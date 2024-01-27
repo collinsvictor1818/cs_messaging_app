@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "826041343832",
+    "project_id": "cs-messaging-app-9773d",
+    "storage_bucket": "cs-messaging-app-9773d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:826041343832:android:34d51c9a078d567a088f2d",
+        "android_client_info": {
+          "package_name": "com.example.cs_messaging_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDAWjjggYjIbPYrif923kl6zT01J4bGUHg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
