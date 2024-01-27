@@ -53,7 +53,7 @@ class _MobileForgotPasswordState extends State<MobileForgotPassword> {
 
   final formKey = GlobalKey<FormState>();
   void resetPassword(String phoneNumber) async {
-    final usersRef = FirebaseFirestore.instance.collection("users");
+    final usersRef = FirebaseFirestore.instance.collection("agent");
     final userQuery = usersRef.where("phone", isEqualTo: phoneNumber);
     final userSnapshot = await userQuery.get();
     final snacky = snackBarHelper.SnackBarHelper(context);
@@ -72,7 +72,7 @@ class _MobileForgotPasswordState extends State<MobileForgotPassword> {
       // Provide feedback to the user
 
       // await launchUrl(Uri.parse(
-      //     'https://wa.me/$phoneNumber/?text=${Uri.encodecomponent('Your ekanisa Account Password is: \n\n *$newPassword*\n\nSave it for future logins')}'));
+      //     'https://wa.me/$phoneNumber/?text=${Uri.encodecomponent('Your CS Chat Account Password is: \n\n *$newPassword*\n\nSave it for future logins')}'));
 
       // Navigate to the login screen
       Navigator.of(context)
@@ -148,7 +148,7 @@ class _MobileForgotPasswordState extends State<MobileForgotPassword> {
             Padding(
               padding: const EdgeInsets.all(8.0)
                   .add(const EdgeInsets.symmetric(vertical: 40)),
-              child: Image.asset('assets/ekanisa_logo_mark.png',
+              child: Image.asset('assets/cs_messaging_app_logo_mark.png',
                   width: 250, height: 150),
             ),
             Padding(
@@ -216,7 +216,7 @@ class _DesktopForgotPasswordState extends State<DesktopForgotPassword> {
   final TextEditingController _phonenumberController = TextEditingController();
   // final TextEditingController _phonenumberController = TextEditingController();
   void resetPassword(String phoneNumber) async {
-    final usersRef = FirebaseFirestore.instance.collection("users");
+    final usersRef = FirebaseFirestore.instance.collection("agent");
     final userQuery = usersRef.where("phone", isEqualTo: phoneNumber);
     final userSnapshot = await userQuery.get();
     final snacky = snackBarHelper.SnackBarHelper(context);
@@ -236,7 +236,7 @@ class _DesktopForgotPasswordState extends State<DesktopForgotPassword> {
       // Provide feedback to the user
 
        await launchUrl(Uri.parse(
-      'https://wa.me/$phoneNumber/?text=${Uri.encodeComponent('Your ekanisa Account Password is: \n\n *$newPassword*\n\nSave it for future logins')}',
+      'https://wa.me/$phoneNumber/?text=${Uri.encodeComponent('Your CS Chat Account Password is: \n\n *$newPassword*\n\nSave it for future logins')}',
     ));
       // Navigate to the login screen
       Navigator.of(context)
@@ -313,7 +313,7 @@ class _DesktopForgotPasswordState extends State<DesktopForgotPassword> {
             Padding(
               padding: const EdgeInsets.all(8.0)
                   .add(const EdgeInsets.symmetric(vertical: 40)),
-              child: Image.asset('assets/ekanisa_logo_mark.png',
+              child: Image.asset('assets/cs_messaging_app_logo_mark.png',
                   width: 250, height: 150),
             ),
             Padding(
@@ -381,7 +381,7 @@ class _TabletForgotPasswordState extends State<TabletForgotPassword> {
   final TextEditingController _phonenumberController = TextEditingController();
   // final TextEditingController _phonenumberController = TextEditingController();
   void resetPassword(String phoneNumber) async {
-    final usersRef = FirebaseFirestore.instance.collection("users");
+    final usersRef = FirebaseFirestore.instance.collection("agent");
     final userQuery = usersRef.where("phone", isEqualTo: phoneNumber);
     final userSnapshot = await userQuery.get();
     final snacky = snackBarHelper.SnackBarHelper(context);
@@ -476,7 +476,7 @@ class _TabletForgotPasswordState extends State<TabletForgotPassword> {
             Padding(
               padding: const EdgeInsets.all(8.0)
                   .add(const EdgeInsets.symmetric(vertical: 40)),
-              child: Image.asset('assets/ekanisa_logo_mark.png',
+              child: Image.asset('assets/cs_messaging_app_logo_mark.png',
                   width: 250, height: 150),
             ),
             Padding(

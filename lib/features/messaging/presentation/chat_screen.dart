@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../../component/chat_bubble.dart';
+import '../../../component/message_list.dart';
+import '../../../component/search_bar.dart';
+
 class ChatScreen extends StatefulWidget {
   final String? username;
 
@@ -13,19 +17,99 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
- String selectedUserID = '';
+  String selectedUserID = '';
   String selectedMessage = '';
+  String previousResponse = '';
+  FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final TextEditingController _messageController = TextEditingController();
-  final TextEditingController _searchController = TextEditingController(); // Add this line
+  final TextEditingController _searchController = TextEditingController();
   List<Map<String, dynamic>> filteredMessages = [];
   List<Map<String, dynamic>> _messages = [];
+  List<String> agentResponses = []; // List to hold agent responses
 
-  void sendMessage(String message, String senderId) {
-    FirebaseFirestore.instance.collection('messages').add({
-      'userId': senderId,
-      'message': message,
-      'time': Timestamp.now(),
+  @override
+  void initState() {
+    super.initState();
+    fetchMessages();
+  }
+
+  void fetchMessages() {
+    FirebaseFirestore.instance
+        .collection('messages')
+        .snapshots()
+        .listen((snapshot) {
+      setState(() {
+        _messages = snapshot.docs
+            .map((doc) => doc.data() as Map<String, dynamic>)
+            .toList();
+      });
     });
+  }
+
+  void sendMessageToChatRoom(
+      String response, String senderId, String recipientId) {
+    Timestamp currentTime = Timestamp.now();
+    String documentId = '${widget.username}_$recipientId';
+    CollectionReference chatRoomCollection =
+        FirebaseFirestore.instance.collection('chat_room');
+
+    Map<String, dynamic> messageDetails = {
+      'recipient_info': {
+        'recipient_id': recipientId,
+        'recipient_name': widget.username,
+      },
+      'sender_id': senderId,
+      'message': selectedMessage,
+      'response': response,
+      'response_time': currentTime,
+    };
+
+    // Check if the sender is the agent
+    if (senderId == 'agent') {
+      // Clear the agentResponses list when sending a new message
+      setState(() {
+        agentResponses.add(response);
+      });
+    }
+
+    // Update Firestore with message details
+    chatRoomCollection.doc(documentId).set(messageDetails);
+  }
+
+  Future<void> updateMessages(
+      String response, String senderId, String recipientId) async {
+    Timestamp currentTime = Timestamp.now();
+    try {
+      final QuerySnapshot messageQuery = await FirebaseFirestore.instance
+          .collection('messages')
+          .where('userId', isEqualTo: senderId)
+          .get();
+
+      if (messageQuery.docs.isNotEmpty) {
+        String userDocId = messageQuery.docs.first.id;
+        CollectionReference messageCollection =
+            FirebaseFirestore.instance.collection('messages');
+
+        Map<String, dynamic> copyOfMessageDetails = {
+          'recipient_info': {
+            'recipient_name': widget.username,
+          },
+          'response': response,
+          'response_time': currentTime,
+        };
+
+        await messageCollection.doc(userDocId).update(copyOfMessageDetails);
+      } else {
+        print('No documents found for the given query.'); 
+      }
+    } on FirebaseException catch (e) {
+      // Handle Firebase exceptions here
+      print('Firebase Exception: $e');
+    } catch (e, stackTrace) {
+      // Handle other exceptions
+      print('Error: $e');
+      print('Stack Trace: $stackTrace');
+    }
   }
 
   void filterMessages(String query) {
@@ -110,73 +194,71 @@ class _ChatScreenState extends State<ChatScreen> {
                     child: Stack(
                       clipBehavior: Clip.antiAlias,
                       children: [
-                        SearchBar(
+                        CustomSearchBar(
                           onSearch: filterMessages,
+                          searchController: _searchController,
                         ),
                         Padding(
                           padding: const EdgeInsets.only(top: 60.0),
-                          child: StreamBuilder(
-                            stream: FirebaseFirestore.instance
-                                .collection('messages')
-                                .snapshots(),
-                            builder: (context,
-                                AsyncSnapshot<QuerySnapshot> snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return Center(
-                                    child: CircularProgressIndicator(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .tertiary));
-                              }
-                              if (snapshot.hasError) {
-                                return Center(
-                                    child: Text('Error: ${snapshot.error}'));
-                              }
-                              _messages = snapshot.data!.docs
-                                  .map((doc) =>
-                                      doc.data() as Map<String, dynamic>)
-                                  .toList();
-                              return ListView(
-                                reverse: true,
-                                padding: EdgeInsets.all(16.0),
-                                children: filteredMessages.isNotEmpty
-                                    ? filteredMessages.map((message) {
-                                        return MessageList(
-                                          username:
-                                              message['userId'].toString(),
-                                          message:
-                                              message['message'].toString(),
-                                          time: message['time'].toString(),
-                                          onTap: () {
-                                            setState(() {
-                                              selectedUserID =
-                                                  message['userId'].toString();
-                                              selectedMessage =
-                                                  message['message'].toString();
-                                            });
-                                          },
-                                        );
-                                      }).toList()
-                                    : _messages.map((message) {
-                                        return MessageList(
-                                          username:
-                                              message['userId'].toString(),
-                                          message:
-                                              message['message'].toString(),
-                                          time: message['time'].toString(),
-                                          onTap: () {
-                                            setState(() {
-                                              selectedUserID =
-                                                  message['userId'].toString();
-                                              selectedMessage =
-                                                  message['message'].toString();
-                                            });
-                                          },
-                                        );
-                                      }).toList(),
-                              );
-                            },
+                          child: SingleChildScrollView(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.all(16.0),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: filteredMessages.isNotEmpty
+                                        ? filteredMessages.map((message) {
+                                            return MessageList(
+                                              username:
+                                                  message['userId'].toString(),
+                                              message:
+                                                  message['message'].toString(),
+                                              time: message['time'].toString(),
+                                              onTap: () {
+                                                setState(() {
+                                                  selectedUserID =
+                                                      message['userId']
+                                                          .toString();
+                                                  selectedMessage =
+                                                      message['message']
+                                                          .toString();
+                                                  previousResponse =
+                                                      message['response']
+                                                          .toString();
+                                                });
+                                              },
+                                            );
+                                          }).toList()
+                                        : _messages.map((message) {
+                                            return MessageList(
+                                              username:
+                                                  message['userId'].toString(),
+                                              message:
+                                                  message['message'].toString(),
+                                              time: message['time'].toString(),
+                                              onTap: () {
+                                                setState(() {
+                                                  selectedUserID =
+                                                      message['userId']
+                                                          .toString();
+                                                  selectedMessage =
+                                                      message['message']
+                                                          .toString();
+                                                  previousResponse =
+                                                      message['response']
+                                                          .toString();
+                                                  agentResponses.clear();
+                                                });
+                                              },
+                                            );
+                                          }).toList(),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ],
@@ -188,9 +270,8 @@ class _ChatScreenState extends State<ChatScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 20.0),
                       child: Container(
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.secondary,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
+                            color: Theme.of(context).colorScheme.secondary,
+                            borderRadius: BorderRadius.circular(30)),
                         child: Column(
                           children: [
                             Padding(
@@ -201,7 +282,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                     onPressed: () {},
                                     color:
                                         Theme.of(context).colorScheme.tertiary,
-                                    icon: Icon(
+                                    icon: const Icon(
                                       Icons.person,
                                       size: 30,
                                     ),
@@ -218,31 +299,32 @@ class _ChatScreenState extends State<ChatScreen> {
                                     ),
                                   ),
                                   Spacer(),
-                                  Text(
-                                    '${widget.username}',
-                                    style: TextStyle(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onBackground,
-                                      fontFamily: 'Gilmer',
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
                                 ],
                               ),
                             ),
                             if (selectedMessage.isNotEmpty)
-                              SingleChildScrollView(
-                                child: Column(
-                                  children: [
-                                    ChatBubble(
-                                      selectedMessage: selectedMessage,
-                                    )
-                                  ],
+                              Expanded(
+                                child: SingleChildScrollView(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      ChatBubble(
+                                        selectedMessage: selectedMessage,
+                                      ),
+                                      for (var response in agentResponses)
+                                        ResponseCard(
+                                          message: response,
+                                        ),
+                                      //  if (previousResponse.isNotEmpty)
+                                      // ResponseCard(
+                                      //   message: previousResponse,
+                                      // ),
+                                    ],
+                                  ),
                                 ),
                               ),
-                            Spacer(),
+                            const Spacer(flex: 1),
                             Padding(
                               padding: const EdgeInsets.all(20.0),
                               child: Container(
@@ -250,7 +332,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                 decoration: BoxDecoration(
                                   color:
                                       Theme.of(context).colorScheme.background,
-                                  borderRadius: BorderRadius.circular(20),
+                                  borderRadius: BorderRadius.circular(15),
                                 ),
                                 child: Padding(
                                   padding: const EdgeInsets.all(8.0),
@@ -272,8 +354,13 @@ class _ChatScreenState extends State<ChatScreen> {
                                         onPressed: () {
                                           String message =
                                               _messageController.text;
-                                          sendMessage(message, 'agent');
-                                          _messageController.clear();
+                                          String response =
+                                              _messageController.text;
+                                          updateMessages(response,
+                                              selectedUserID, 'agent');
+                                          sendMessageToChatRoom(
+                                              message, 'agent', selectedUserID);
+                                          // _messageController.clear();
                                         },
                                         icon: Icon(
                                           Icons.send,
@@ -292,6 +379,49 @@ class _ChatScreenState extends State<ChatScreen> {
                       ),
                     ),
                   ),
+                  // Expanded(
+                  //   child: Container(
+                  //     decoration: BoxDecoration(
+                  //       color: Theme.of(context).colorScheme.secondary,
+                  //       borderRadius: BorderRadius.circular(20),
+                  //     ),
+                  //     child: StreamBuilder(
+                  //     stream: _firestore.collection('messages').snapshots(),
+                  //     builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                  //       if (snapshot.connectionState == ConnectionState.waiting) {
+                  //         return Center(child: CircularProgressIndicator());
+                  //       }
+
+                  //       if (snapshot.hasError) {
+                  //         return Center(child: Text('Error: ${snapshot.error}'));
+                  //       }
+
+                  //       if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
+                  //         return ListView.builder(
+                  //           itemCount: snapshot.data!.docs.length,
+                  //           itemBuilder: (context, index) {
+                  //             DocumentSnapshot messageDoc = snapshot.data!.docs[index];
+                  //             String message = messageDoc['message'];
+
+                  //             // Check if the field "assigned_agent" exists in the document
+                  //             String assignedAgent = messageDoc['assigned_agent'] != null
+                  //                 ? messageDoc['assigned_agent']
+                  //                 : 'Unassigned';
+
+                  //             return ListTile(
+                  //               title: Text(message),
+                  //               subtitle: Text('Assigned to: $assignedAgent'),
+                  //             );
+                  //           },
+                  //         );
+                  //       }
+
+                  //       return Center(child: Text('No messages available'));
+                  //     },
+                  //   ),
+
+                  //   ),
+                  // )
                 ],
               ),
             ),
@@ -300,221 +430,4 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
     );
   }
-}
-
-class SearchBar extends StatefulWidget {
-  final Function(String) onSearch;
-
-  SearchBar({
-    required this.onSearch,
-  });
-
-  @override
-  State<SearchBar> createState() => _SearchBarState();
-}
-
-class _SearchBarState extends State<SearchBar> {
-  @override
-  Widget build(BuildContext context) {
-
-  final TextEditingController _searchController = TextEditingController(); // Add this line
-
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Container(
-        height: 35,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.secondary,
-          borderRadius: BorderRadius.circular(5.0),
-        ),
-        child: TextFormField(
-          controller: _searchController,
-          maxLines: 1,
-          minLines: 1,
-          cursorColor: Theme.of(context).colorScheme.tertiary,
-          style: TextStyle(
-            fontFamily: 'Gilmer',
-            fontSize: 14,
-            color: Theme.of(context).colorScheme.onBackground,
-            fontWeight: FontWeight.w300,
-          ),
-          onChanged: widget.onSearch,
-          decoration: InputDecoration(
-            border: InputBorder.none,
-            disabledBorder: InputBorder.none,
-            hintText: "Search",
-            hintStyle: TextStyle(
-              fontSize: 14,
-              color: Theme.of(context).hintColor,
-              fontFamily: "Gilmer",
-              fontWeight: FontWeight.w500,
-            ),
-            focusColor: Theme.of(context).colorScheme.tertiary,
-            isDense: true,
-            contentPadding:
-                const EdgeInsets.symmetric(vertical: 10, horizontal: 2),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(15),
-              borderSide: BorderSide(
-                color: Theme.of(context).colorScheme.secondary,
-                width: 0,
-              ),
-            ),
-            fillColor: Theme.of(context).colorScheme.secondary,
-            filled: true,
-            prefixIcon: Icon(Icons.search, color: Theme.of(context).hintColor),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(15),
-              borderSide: BorderSide(
-                color: Theme.of(context).colorScheme.tertiary,
-                width: 2,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class MessageList extends StatelessWidget {
-  final String username;
-  final String message;
-  final String time;
-  final VoidCallback onTap;
-
-  const MessageList({
-    Key? key,
-    required this.username,
-    required this.message,
-    required this.time,
-    required this.onTap,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      child: InkWell(
-        onTap: onTap,
-        hoverColor: Colors.transparent,
-        focusColor: Colors.transparent,
-        splashColor: Colors.transparent,
-        highlightColor:
-            Theme.of(context).colorScheme.tertiary.withOpacity(0.01),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  message,
-                  style: const TextStyle(color: Colors.white),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 10.0),
-                Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.secondary,
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(3.0)
-                        .add(EdgeInsets.symmetric(horizontal: 5)),
-                    child: Row(
-                      children: [
-                        Text(
-                          'User ID: ',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            color: Theme.of(context).colorScheme.onBackground,
-                          ),
-                        ),
-                        Text(
-                          username,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            color: Theme.of(context).colorScheme.tertiary,
-                          ),
-                        ),
-                        Spacer(),
-                        Text(
-                          time,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            color: Theme.of(context).hintColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 4.0),
-            Divider(
-              color:
-                  Theme.of(context).colorScheme.onBackground.withOpacity(0.1),
-            ),
-            SizedBox(height: 16.0),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class ChatBubble extends StatelessWidget {
-  final String? selectedMessage;
-
-  const ChatBubble({
-    Key? key,
-    required this.selectedMessage,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding:
-          const EdgeInsets.all(5.0).add(EdgeInsets.symmetric(horizontal: 55)),
-      child: Align(
-        alignment: Alignment.topLeft,
-        child: Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.tertiary,
-            borderRadius: BorderRadius.circular(5),
-          ),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              minWidth: 50.0,
-              maxWidth: 500.0,
-            ),
-            child: Align(
-              alignment: Alignment.topLeft,
-              child: Container(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    '$selectedMessage',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.background,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-void main() {
-  runApp(MaterialApp(
-    home: ChatScreen(username: 'John'),
-  ));
 }

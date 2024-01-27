@@ -206,7 +206,7 @@ class _MobileSignUpState extends State<MobileSignUp> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Image.asset('assets/cs_messaging_app_logo_mark.png',
-                  width: 250, height: 120),
+                  width: 150, height: 75),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -534,7 +534,7 @@ class _DesktopSignUpState extends State<DesktopSignUp> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Image.asset('assets/cs_messaging_app_logo_mark.png',
-                  width: 250, height: 120),
+                  width: 150, height: 75),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -860,7 +860,7 @@ class _TabletSignUpState extends State<TabletSignUp> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Image.asset('assets/cs_messaging_app_logo_mark.png',
-                  width: 250, height: 120),
+                  width: 150, height: 75),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),

@@ -25,7 +25,7 @@
   //     // Sends code to Whatsapp
   //     String autoPass = generatePassword();
   //     String message =
-  //         'Your ekanisa Account Password is \n  $autoPass'; // Replace with your message
+  //         'Your CS Chat Account Password is \n  $autoPass'; // Replace with your message
   //     String sender = _phonenumberController.text.trim();
   //     String url =
   //         'https://wa.me/$sender/?text=${Uri.encodecomponent(message)}';

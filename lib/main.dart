@@ -1,3 +1,4 @@
+import 'package:cs_messaging_app/features/messaging/presentation/auth/log_in.dart';
 import 'package:cs_messaging_app/features/messaging/presentation/chat_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -41,7 +42,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: lightTheme,
         darkTheme: darkTheme,
-        home: const ChatScreen(username: '',),
+        home: const ChatScreen(username: 'Collins',),
         initialBinding: UserBindings(),
       ),
     );

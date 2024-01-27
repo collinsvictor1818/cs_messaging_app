@@ -30,7 +30,7 @@ class _LogInState extends State<LogInUser> {
         tabletBody: TabletLogIn(),
       ),
     );
-  }
+  } 
 }
 
 class TabletLogIn extends StatefulWidget {
@@ -131,7 +131,7 @@ class _TabletLogInState extends State<TabletLogIn> {
               padding: const EdgeInsets.all(8.0)
                   .add(const EdgeInsets.symmetric(vertical: 40)),
               child: Image.asset('assets/cs_messaging_app_logo_mark.png',
-                  width: 250, height: 120),
+                  width: 150, height: 75),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -265,16 +265,13 @@ class _MobileLogInState extends State<MobileLogIn> {
   final TextEditingController _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   final UserController userController = Get.find(); // Access the UserController
-
-  void login() async {
+ void login() async {
     final String identifier = _usernameController.text.trim();
     final String password = _passwordController.text.trim();
     SnackBarHelper snacky = SnackBarHelper(context);
 
     if (password.isEmpty || identifier.isEmpty) {
-      snacky.showSnackBar("Please Enter Both Username and Password",
-          isError: true);
-      print('Please Enter Both Username and Password');
+      snacky.showSnackBar("Please Enter Both Username and Password", isError: true);
       return;
     } else {
       try {
@@ -285,33 +282,25 @@ class _MobileLogInState extends State<MobileLogIn> {
             .get();
 
         if (usersQuery.docs.isNotEmpty) {
-          final userData = usersQuery.docs.first.data();
-          final fetchUsername =
-              userData['username']?.split(' ')[0] ?? ''; // Get the first word
-          final fetchPhone = userData['phone'] ?? '';
-
-          // Update the UserController with user data
-          userController.updateUserData(fetchUsername, fetchPhone);
-          userController.fetchUserDataFromFirestore();
-
-          // Successfully logged in, navigate to the dashboard
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => ChatScreen(),
-            ),
-          );
+          final userData = usersQuery.docs.first.data() as Map<String, dynamic>;
+          final username = userData['username']?.split(' ')[0] ?? '';
+          Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => ChatScreen(username: username),
+          ));
           snacky.showSnackBar("Log In Successful", isError: false);
           _usernameController.clear();
           _passwordController.clear();
         } else {
-          // No matching user found with the provided credentials
           snacky.showSnackBar("Invalid Login Details", isError: true);
         }
       } on FirebaseException catch (e) {
         snacky.showSnackBar(e.toString(), isError: true);
+      } catch (e) {
+        snacky.showSnackBar("An error occurred", isError: true);
       }
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -453,17 +442,13 @@ class _DesktopLogInState extends State<DesktopLogIn> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-
-  void login() async {
-    final String identifier = _usernameController.text.trim() ?? '';
-    final String password = _passwordController.text.trim() ?? '';
+ void login() async {
+    final String identifier = _usernameController.text.trim();
+    final String password = _passwordController.text.trim();
     SnackBarHelper snacky = SnackBarHelper(context);
-    final UserController userController =
-        Get.find(); // Access the UserController
+
     if (password.isEmpty || identifier.isEmpty) {
-      snacky.showSnackBar("Please Enter Both Username and Password",
-          isError: true);
-      print('Please Enter Both Username and Password');
+      snacky.showSnackBar("Please Enter Both Username and Password", isError: true);
       return;
     } else {
       try {
@@ -474,48 +459,21 @@ class _DesktopLogInState extends State<DesktopLogIn> {
             .get();
 
         if (usersQuery.docs.isNotEmpty) {
-          final userData = usersQuery.docs.first.data();
-          final fetchUsername =
-              userData['username']?.split(' ')[0] ?? ''; // Get the first word
-          final fetchPhone = userData['phone'] ?? '';
-          final userId =
-              usersQuery.docs.first.id; // Get the document ID of the user
-
-                
-        // Update the UserController with user data
-          userController.updateUserData(fetchUsername, fetchPhone);
-          userController.fetchUserDataFromFirestore();
-
-          // Update the user status to "online" in Firestore
-          await FirebaseFirestore.instance
-              .collection('agent')
-              .doc(userId)
-              .update({
-            'status': 'online',
-          });
-
-
-
-          // Successfully logged in, navigate to the dashboard
-       Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => ChatScreen(username: fetchUsername),
-          ),
-        );
+          final userData = usersQuery.docs.first.data() as Map<String, dynamic>;
+          final username = userData['username']?.split(' ')[0] ?? '';
+          Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => ChatScreen(username: username),
+          ));
           snacky.showSnackBar("Log In Successful", isError: false);
           _usernameController.clear();
           _passwordController.clear();
         } else {
-          try {
-            // No matching user found with the provided credentials
-            snacky.showSnackBar("Invalid Login Details", isError: true);
-          } catch (e) {
-            // No matching user found with the provided credentials
-            snacky.showSnackBar(e.toString(), isError: true);
-          }
+          snacky.showSnackBar("Invalid Login Details", isError: true);
         }
       } on FirebaseException catch (e) {
         snacky.showSnackBar(e.toString(), isError: true);
+      } catch (e) {
+        snacky.showSnackBar("An error occurred", isError: true);
       }
     }
   }

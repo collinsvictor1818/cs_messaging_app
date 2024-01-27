@@ -37,7 +37,7 @@ class _FormBirthdayState extends State<FormBirthday> {
       builder: (BuildContext context) {
         return Container(
           height: 300,
-          color: Colors.white.withOpacity(0.9),
+          color: Theme.of(context).colorScheme.onBackground.withOpacity(0.9),
           child: Column(
             children: [
               Expanded(
