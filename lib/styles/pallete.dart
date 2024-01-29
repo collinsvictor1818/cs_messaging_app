@@ -19,7 +19,7 @@ class AppColor {
 
   // ignore: constant_identifier_names
   static const Color dark = Color(0xFF212121);
-  static const Color accentDark = Color.fromARGB(255, 39, 39, 39);
+  static const Color accentDark = Color.fromARGB(255, 44, 44, 44);
   static const Color hintText = Color.fromARGB(255, 188, 188, 188);
   static  Color accentLight = const Color.fromARGB(255, 245, 245, 245);
   static const Color green = Color(0xff00b7e2);

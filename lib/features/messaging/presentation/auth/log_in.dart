@@ -8,7 +8,7 @@ import '../../../../component/form_text.dart';
 import '../../../../component/password.dart';
 import '../../../../component/snacky.dart';
 import '../../../../utils/responsive/responsive_layout.dart';
-import '../chat_screen.dart';
+import '../screens/chat_screen.dart';
 import 'forgot_password.dart';
 import 'sign_up.dart';
 

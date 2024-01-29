@@ -1,5 +1,5 @@
 import 'package:cs_messaging_app/features/messaging/presentation/auth/log_in.dart';
-import 'package:cs_messaging_app/features/messaging/presentation/chat_screen.dart';
+import 'package:cs_messaging_app/features/messaging/presentation/screens/chat_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -14,19 +14,20 @@ import 'utils/user_controller.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   // FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
   // FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
   runApp(const MyApp());
 }
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   @override
   Widget build(BuildContext context) {
-        Get.lazyPut(()=> UserController());
+    Get.lazyPut(() => UserController());
     return MultiProvider(
       providers: [
         Provider<AuthService>(
@@ -42,7 +43,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: lightTheme,
         darkTheme: darkTheme,
-        home: const ChatScreen(username: 'Collins',),
+        home: const LogInUser(),
         initialBinding: UserBindings(),
       ),
     );
@@ -52,7 +53,6 @@ class MyApp extends StatelessWidget {
 class UserBindings implements Bindings {
   @override
   void dependencies() {
-      // Get.lazyPut<UserController>(() => UserController());
+    // Get.lazyPut<UserController>(() => UserController());
   }
-
 }

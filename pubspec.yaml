@@ -21,6 +21,7 @@ dependencies:
   equatable: ^2.0.5
   injectable_generator:
   build_runner:
+  flutter_launcher_icons: ^0.13.1
   get: ^4.6.6
   url_launcher: ^6.2.4
   firebase_auth: ^4.16.0
@@ -28,11 +29,20 @@ dependencies:
   csv: ^5.1.1
   provider: ^6.1.1
   intl: ^0.19.0
+  riverpod_annotation: ^2.3.3
+  shared_preferences: ^2.2.2
+  hooks_riverpod: ^2.4.9
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.0
-
+flutter_launcher_icons:
+  image_path:  "assets/cs_messaging_app_logo_mark.png"
+  color_dark: "#23232323"
+  color: "#23232323"
+  android: true
+  ios: true  
+  web: true
 flutter:
 
   uses-material-design: true
@@ -40,6 +50,7 @@ flutter:
   assets:
     - assets/cs_messaging_app_logo_mark.png
     - assets/messages.csv
+    - assets/cs.png
 
 
   fonts:

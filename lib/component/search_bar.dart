@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class CustomSearchBar extends StatefulWidget {
@@ -18,56 +17,39 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Container(
-        height: 35,
-        width: double.infinity,
+        height: 50,
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.secondary,
-          borderRadius: BorderRadius.circular(5.0),
+          borderRadius: BorderRadius.circular(15),
         ),
-        child: TextFormField(
-          controller: widget.searchController,
-          maxLines: 1,
-          minLines: 1,
-          cursorColor: Theme.of(context).colorScheme.tertiary,
-          style: TextStyle(
-            fontFamily: 'Gilmer',
-            fontSize: 14,
-            color: Theme.of(context).colorScheme.onBackground,
-            fontWeight: FontWeight.w300,
-          ),
-          onChanged: widget.onSearch,
-          decoration: InputDecoration(
-            border: InputBorder.none,
-            disabledBorder: InputBorder.none,
-            hintText: "Search chats by: UserID, Message",
-            hintStyle: TextStyle(
-              fontSize: 14,
-              color: Theme.of(context).hintColor,
-              fontFamily: "Gilmer",
-              fontWeight: FontWeight.w500,
-            ),
-            focusColor: Theme.of(context).colorScheme.tertiary,
-            isDense: true,
-            contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 2),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(15),
-              borderSide: BorderSide(
-                color: Theme.of(context).colorScheme.secondary,
-                width: 0,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            children: [
+               IconButton(
+                onPressed: () {},
+                icon: Icon(
+                  Icons.search_rounded,
+                  color: Theme.of(context).colorScheme.tertiary,
+                ),
               ),
-            ),
-            fillColor: Theme.of(context).colorScheme.secondary,
-            filled: true,
-            prefixIcon: Icon(Icons.search, color: Theme.of(context).hintColor),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(15),
-              borderSide: BorderSide(
-                color: Theme.of(context).colorScheme.tertiary,
-                width: 2,
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextFormField(
+                    onChanged: widget.onSearch,
+                    controller: widget.searchController,
+                    decoration: const InputDecoration(
+                      hintText: 'Search',
+                      border: InputBorder.none,
+                    ),
+                  ),
+                ),
               ),
-            ),
+             
+            ],
           ),
         ),
       ),

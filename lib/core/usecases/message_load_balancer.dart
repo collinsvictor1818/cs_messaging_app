@@ -1,57 +1,90 @@
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Message Assignment Algorithm',
+      home: MessageAssignmentPage(),
+    );
+  }
+}
+
+class MessageAssignmentPage extends StatefulWidget {
+  @override
+  _MessageAssignmentPageState createState() => _MessageAssignmentPageState();
+}
+
+class _MessageAssignmentPageState extends State<MessageAssignmentPage> {
+  final MessageAssignmentAlgorithm messageAssignmentAlgorithm =
+      MessageAssignmentAlgorithm();
+
+  @override
+  void initState() {
+    super.initState();
+    assignMessages();
+  }
+
+  Future<void> assignMessages() async {
+    await messageAssignmentAlgorithm.assignMessagesToAgents();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Message Assignment Algorithm'),
+      ),
+      body: Center(
+        child: Text(
+          'Messages have been assigned successfully!',
+          style: TextStyle(fontSize: 20),
+        ),
+      ),
+    );
+  }
+}
 
 class MessageAssignmentAlgorithm {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  late Map<String, String> _assignedAgents = {};
+
+  Map<String, String> get assignedAgents => _assignedAgents;
 
   Future<void> assignMessagesToAgents() async {
+    _assignedAgents.clear();
+
     try {
-      // Query online agents
       QuerySnapshot onlineAgentsSnapshot =
-          await _firestore.collection('agent').where('online', isEqualTo: 'online').get();
+          await _firestore.collection('agent').where('status', isEqualTo: 'online').get();
 
       List<DocumentSnapshot> onlineAgents = onlineAgentsSnapshot.docs;
+      onlineAgents.sort((a, b) =>
+          a['assigned_messages_count'].compareTo(b['assigned_messages_count']));
 
-      // Sort agents by the number of messages they have assigned
-      onlineAgents.sort((a, b) => a['assigned_messages_count'].compareTo(b['assigned_messages_count']));
-
-      // Query messages that are not assigned to any agent and are not in progress
-      QuerySnapshot unassignedMessagesSnapshot =
-          await _firestore.collection('messages').where('assigned_agent', isEqualTo: null).where('status', isEqualTo: 'unassigned').get();
+      QuerySnapshot unassignedMessagesSnapshot = await _firestore
+          .collection('messages')
+          .where('status', isEqualTo: 'unassigned')
+          .get();
 
       List<DocumentSnapshot> unassignedMessages = unassignedMessagesSnapshot.docs;
 
-      // Assign messages to agents
       for (DocumentSnapshot messageDoc in unassignedMessages) {
-        // Find the agent with the fewest assigned messages
         DocumentSnapshot assignedAgent = onlineAgents.first;
 
-        // Mark the message as in progress and assign it to the agent
-        await _firestore.runTransaction((transaction) async {
-          DocumentSnapshot freshMessageDoc =
-              await transaction.get(messageDoc.reference);
-          if (!freshMessageDoc.exists) {
-            throw Exception('Message does not exist!');
-          }
+        _assignedAgents[messageDoc.id] = assignedAgent.id;
 
-          // Check if the message is still unassigned and not in progress
-          if (freshMessageDoc['status'] == 'unassigned') {
-            // Update message status and assigned agent
-            transaction.update(messageDoc.reference, {
-              'status': 'in-progress',
-              'assigned_agent': assignedAgent.id,
-            });
-
-            // Update the assigned message count for the agent
-            transaction.update(_firestore.collection('agent').doc(assignedAgent.id), {
-              'assigned_messages_count': (assignedAgent['assigned_messages_count'] ?? 0) + 1,
-            });
-          } else {
-            throw Exception('Message is already assigned or in progress.');
-          }
+        await _firestore.collection('agent').doc(assignedAgent.id).update({
+          'assigned_messages_count': (assignedAgent['assigned_messages_count'] ?? 0) + 1,
         });
 
-        // Re-sort the agents
-        onlineAgents.sort((a, b) => a['assigned_messages_count'].compareTo(b['assigned_messages_count']));
+        onlineAgents.sort((a, b) =>
+            a['assigned_messages_count'].compareTo(b['assigned_messages_count']));
       }
 
       print('Messages assigned successfully.');

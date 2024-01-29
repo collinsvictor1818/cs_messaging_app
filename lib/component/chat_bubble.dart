@@ -19,9 +19,9 @@ class ChatBubble extends StatelessWidget {
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.tertiary,
             borderRadius: BorderRadius.only(
-                topRight: Radius.circular(20),
-                bottomLeft: Radius.circular(20),
-                bottomRight: Radius.circular(20)),
+                topRight: Radius.circular(10),
+                bottomLeft: Radius.circular(10),
+                bottomRight: Radius.circular(10)),
           ),
           child: ConstrainedBox(
             constraints: const BoxConstraints(
@@ -32,12 +32,13 @@ class ChatBubble extends StatelessWidget {
               alignment: Alignment.topLeft,
               child: Container(
                 child: Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(15.0),
                   child: Text(
                     '$selectedMessage',
+                    
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.background,
-                    ),
+                    fontSize: 14),
                   ),
                 ),
               ),
@@ -69,9 +70,9 @@ class ResponseCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.tertiary.withOpacity(0.1),
             borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(20),
-                bottomLeft: Radius.circular(20),
-                bottomRight: Radius.circular(20)),
+                topLeft: Radius.circular(10),
+                bottomLeft: Radius.circular(10),
+                bottomRight: Radius.circular(10)),
           ),
           
           child: ConstrainedBox(
@@ -82,7 +83,7 @@ class ResponseCard extends StatelessWidget {
             child: Align(
               alignment: Alignment.topLeft,
               child: Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(15.0),
                 child: Text(
                   '$message' ?? '$response',
                   style: TextStyle(

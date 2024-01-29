@@ -1,0 +1,31 @@
+  dev_dependencies:
+  flutter_launcher_icons: "^0.13.1"
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  # adaptive_icon_background: "#23232323"
+  # adaptive_icon_foreground: "#23232323"
+  # background: "#23232323"
+  ios: true
+  remove_alpha_ios: true
+  image_path: "assets/cs_messaging_app_logo_mark.png"
+  min_sdk_android: 21 # android min sdk min:16, default 21
+  web:
+    generate: true
+    image_path: "aassets/cs_messaging_app_logo_mark.png"
+    background_color: "#23232323"
+    theme_color: "#23232323"
+  windows:
+    generate: true
+    image_path: "assets/cs_messaging_app_logo_mark.png"
+    icon_size: 48 # min:48, max:256, default: 48
+  macos:
+    generate: true
+    image_path: "assets/cs_messaging_app_logo_mark.png"
+  android:
+    generate: true
+    image_path: "assets/cs_messaging_app_logo_mark.png"
+    background_color: "#23232323"
+    theme_color: "#23232323"
+  ios:
+    remove_alpha_ios: true
