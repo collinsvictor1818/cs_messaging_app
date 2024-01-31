@@ -1,7 +1,7 @@
 # CS Messaging Web App
 Welcome to the CS Messaging Web App project! This application is built using Flutter and Firestore to streamline customer inquiries for Branch.
-[Solution Design.docx](https://github.com/collinsvictor1818/cs_messaging_app/files/14115652/Solution.Design.docx)
-![CS](https://github.com/collinsvictor1818/cs_messaging_app/assets/42299025/0ab11c2c-57c8-4538-af91-9eff69433b17)
+![CS](https://github.com/collinsvictor1818/cs_messaging_app/assets/42299025/d561d367-204a-4179-aa8c-6c6ea3c13f41)
+
 
 ### Installation Process
 To install and run the CS Messaging Web App on your local machine, follow these steps:
